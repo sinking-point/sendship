@@ -188,20 +188,44 @@ Self only.
 **Body:**
 
 ```json
+{
+  "content": "string",
+  "images": [
     {
-      "content": "string",
-      "image_ids": ["string"] (optional),
-      "video_ids": ["string"] (optional)
+      "url": "string",
+      "sha256": "string"
     }
+  ] (optional),
+  "videos": [
+    {
+      "url": "string",
+      "sha256": "string"
+    }
+  ] (optional)
+}
 ```
 
 #### Parameters
 
-| Parameter  | Description                                                  | Type   | Required |
-| ---------- | ------------------------------------------------------------ | ------ | -------- |
-| content    | The content of the post.                                     | string | Yes      |
-| image_ids  | The list of IDs for images associated with the post.         | [string] | No       |
-| video_ids  | The list of IDs for videos associated with the post.         | [string] | No       |
+| Parameter  | Description                                                  | Type        | Required |
+| ---------- | ------------------------------------------------------------ | ----------- | -------- |
+| content    | The content of the post.                                     | string      | Yes      |
+| images     | A list of image objects associated with the post.            | [Image]     | No       |
+| videos     | A list of video objects associated with the post.            | [Video]     | No       |
+
+##### Image Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| url       | The URL of the image.                  | string | Yes      |
+| sha256    | The SHA-256 hash of the image content. | string | Yes      |
+
+##### Video Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| url       | The URL of the video.                  | string | Yes      |
+| sha256    | The SHA-256 hash of the video content. | string | Yes      |
 
 #### Response
 
@@ -214,76 +238,6 @@ Self only.
       "id": "string"
     }
 ```
-
-### Upload Images
-
-This endpoint allows users to upload images.
-
-#### Authorization
-
-Self only.
-
-#### Request
-
-**Endpoint:** `POST /api/v1/images`
-
-**Headers:**
-
-- `Content-Type: multipart/form-data`
-- `Authorization: Bearer {access_token}`
-
-**Body:**
-
-Files in multipart/form-data format.
-
-#### Response
-
-**Status code:** `201 Created`
-
-**Body:**
-
-```json
-    {
-      "ids": ["string"]
-    }
-```
-
-The `ids` field should be in the same order as the files were in the request.
-
-### Upload Videos
-
-This endpoint allows users to upload videos.
-
-#### Authorization
-
-Self only.
-
-#### Request
-
-**Endpoint:** `POST /api/v1/videos`
-
-**Headers:**
-
-- `Content-Type: multipart/form-data`
-- `Authorization: Bearer {access_token}`
-
-**Body:**
-
-Files in multipart/form-data format.
-
-#### Response
-
-**Status code:** `201 Created`
-
-**Body:**
-
-```json
-    {
-      "ids": ["string"]
-    }
-```
-
-The `ids` field should be in the same order as the files were in the request.
 
 ### TODO add more endpoints
 
