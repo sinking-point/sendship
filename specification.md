@@ -308,6 +308,7 @@ Depends on the post's audience setting.
 
 **Body:**
 
+```json
 {
   "id": "string",
   "created_at": "string",
@@ -352,6 +353,7 @@ Depends on the post's audience setting.
     }
   ]
 }
+```
 
 #### Response Fields
 
