@@ -42,10 +42,12 @@ This should include:
 - Followers: User A can follow user B.
 - Feed: Then, B's posts appear on A's feed.
 - Likes: Users can like posts. Posts keep a set of people who liked them.
-- Shares: Users can share posts. When they share a post, it appears on their timeline, and on the feeds of their followers.
-- Replies: Users can reply to posts. Posts keep a list of links to replies. Replies are posts that contain a link to the parent.
+- Shares: Users can share posts. When they share a post, it appears on their timeline, and on the feeds of their followers. Posts keep a list of links to shares. Shares are posts that contain a link to another post. They're intended audience is the sharer's followers.
+- Replies: Users can reply to posts. Posts keep a list of links to replies. Replies are posts that contain a link to the parent. Their intended audience is the author and readers of the parent post.
 - Direct messages: Users can send messages to each other privately.
 - Multimedia: Posts can contain images and videos.
+
+Note that a post can be both a share and a reply.
 
 ### Decentralisation
 
@@ -201,17 +203,31 @@ Self only.
       "url": "string",
       "sha256": "string"
     }
-  ] (optional)
+  ] (optional),
+  "parent_post": {
+    "domain": "string",
+    "id": "string",
+    "sha256": "string"
+  } (optional),
+  "shared_post": {
+    "domain": "string",
+    "id": "string",
+    "sha256": "string"
+  } (optional),
+  "audience": "string"
 }
 ```
 
 #### Parameters
 
-| Parameter  | Description                                                  | Type        | Required |
-| ---------- | ------------------------------------------------------------ | ----------- | -------- |
-| content    | The content of the post.                                     | string      | Yes      |
-| images     | A list of image objects associated with the post.            | [Image]     | No       |
-| videos     | A list of video objects associated with the post.            | [Video]     | No       |
+| Parameter   | Description                                                  | Type        | Required |
+| ----------- | ------------------------------------------------------------ | ----------- | -------- |
+| content     | The content of the post.                                     | string      | Yes      |
+| images      | A list of image objects associated with the post.            | [Image]     | No       |
+| videos      | A list of video objects associated with the post.            | [Video]     | No       |
+| parent_post | An object containing information about the parent post.      | ParentPost  | No       |
+| shared_post | An object containing information about the post being shared.| SharedPost  | No       |
+| audience    | The visibility level of the post.                             | string      | Yes      |
 
 ##### Image Object
 
@@ -227,6 +243,30 @@ Self only.
 | url       | The URL of the video.                  | string | Yes      |
 | sha256    | The SHA-256 hash of the video content. | string | Yes      |
 
+##### Parent Post Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| domain    | The domain name of the parent post.     | string | Yes      |
+| id        | The ID of the parent post.              | string | Yes      |
+| sha256    | The SHA-256 hash of the parent post.    | string | Yes      |
+
+##### Shared Post Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| domain    | The domain name of the shared post.     | string | Yes      |
+| id        | The ID of the shared post.              | string | Yes      |
+| sha256    | The SHA-256 hash of the shared post.    | string | Yes      |
+
+##### Audience Values
+
+| Value     | Description                                           |
+| --------- | ----------------------------------------------------- |
+| public    | Anyone can access the post.                            |
+| sendship  | Any Sendship server can access the post.              |
+| followees | Only the post creator and the people they follow can access. |
+
 #### Response
 
 **Status code:** `201 Created`
@@ -234,10 +274,169 @@ Self only.
 **Body:**
 
 ```json
-    {
-      "id": "string"
-    }
+{
+  "id": "string"
+}
 ```
+
+### Get Post
+
+This endpoint allows users to retrieve a post by its ID.
+
+#### Authorization
+
+Depends on the post's audience setting.
+
+#### Request
+
+**Endpoint:** `GET /api/v1/posts/{post_id}`
+
+**Headers:**
+
+- `Content-Type: application/json`
+- `Authorization: Bearer {access_token}` (if required)
+
+#### Path Parameters
+
+| Parameter | Description                     | Type   | Required |
+| --------- | ------------------------------- | ------ | -------- |
+| post_id   | The unique identifier of a post | string | Yes      |
+
+#### Response
+
+**Status code:** `200 OK`
+
+**Body:**
+
+{
+  "id": "string",
+  "created_at": "string",
+  "updated_at": "string",
+  "content": "string",
+  "images": [
+    {
+      "url": "string",
+      "sha256": "string"
+    }
+  ],
+  "videos": [
+    {
+      "url": "string",
+      "sha256": "string"
+    }
+  ],
+  "parent_post": {
+    "domain": "string",
+    "id": "string",
+    "sha256": "string"
+  } (optional),
+  "shared_post": {
+    "domain": "string",
+    "id": "string",
+    "sha256": "string"
+  } (optional),
+  "audience": "string",
+  "likes": [
+    {
+      "jwt": "string"
+    }
+  ],
+  "shares": [
+    {
+      "jwt": "string"
+    }
+  ],
+  "replies": [
+    {
+      "jwt": "string"
+    }
+  ]
+}
+
+#### Response Fields
+
+| Field      | Description                                                  | Type        | Required |
+| ---------- | ------------------------------------------------------------ | ----------- | -------- |
+| id         | The unique identifier of the post.                           | string      | Yes      |
+| created_at | The timestamp when the post was created (ISO 8601 format).   | string      | Yes      |
+| updated_at | The timestamp when the post was last updated (ISO 8601 format). | string      | Yes      |
+| content    | The textual content of the post.                                     | string      | Yes      |
+| images     | A list of image objects associated with the post.            | [Image]     | No       |
+| videos     | A list of video objects associated with the post.            | [Video]     | No       |
+| parent_post | An object containing information about the parent post.      | ParentPost  | No       |
+| shared_post | An object containing information about the post being shared.| SharedPost  | No       |
+| audience    | The visibility level of the post.                             | string      | Yes      |
+| likes       | A list of JWT strings representing likes on the post.                                                | [string]              | No       |
+| shares      | A list of JWT strings representing shares of the post.                                               | [string]              | No       |
+| replies     | A list of JWT strings representing replies to the post.                                              | [string]              | No       |
+
+##### Image Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| url       | The URL of the image.                  | string | Yes      |
+| sha256    | The SHA-256 hash of the image content. | string | Yes      |
+
+##### Video Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| url       | The URL of the video.                  | string | Yes      |
+| sha256    | The SHA-256 hash of the video content. | string | Yes      |
+
+##### Parent Post Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| domain    | The domain name of the parent post.     | string | Yes      |
+| id        | The ID of the parent post.              | string | Yes      |
+| sha256    | The SHA-256 hash of the parent post.    | string | Yes      |
+
+##### Shared Post Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| domain    | The domain name of the shared post.     | string | Yes      |
+| id        | The ID of the shared post.              | string | Yes      |
+| sha256    | The SHA-256 hash of the shared post.    | string | Yes      |
+
+##### Audience Values
+
+| Value     | Description                                           |
+| --------- | ----------------------------------------------------- |
+| public    | Anyone can access the post. |
+| sendship | Any Sendship server can access the post. |
+| followees | Only the post creator and their followees can access. |
+
+##### Likes
+
+Each like in the likes list is a JWT string from the liker signed with RS256, containing the following claims:
+
+| Claim        | Description                              | Type   |
+| ------------ | ---------------------------------------- | ------ |
+| liker_domain | The domain name of the liker.            | string |
+| post_domain  | The domain name of the post.             | string |
+| post_id      | The ID of the post being liked (should match this post's ID).          | string |
+
+##### Shares
+
+Each share in the shares list is a JWT string from the sharer signed with RS256, containing the following claims:
+
+| Claim          | Description                                | Type   |
+| -------------- | ------------------------------------------ | ------ |
+| sharer_domain  | The domain name of the sharer.             | string |
+| sharing_post_id| The ID of the post that shares the content.| string |
+| shared_post_id | The ID of the post being shared (should match this post's ID).           | string |
+
+##### Replies
+
+Each reply in the replies list is a JWT string from the replier signed with RS256, containing the following claims:
+
+| Claim          | Description                                      | Type   |
+| -------------- | ------------------------------------------------ | ------ |
+| replier_domain | The domain name of the replier.                  | string |
+| reply_post_id  | The ID of the reply post.                        | string |
+| parent_post_id | The ID of the post being replied to (should match this post's ID).             | string |
 
 ### TODO add more endpoints
 
