@@ -141,23 +141,30 @@ It has 2 responsibilities:
 1. Communicate with the client
 2. Communicate with other servers
 
-It's divided into 2 components:
+Communication with the client is outside the scope of this specification.
+It's better to allow implementers to design the interface between client and server in whatever way works best for them.
+It's self contained and invisible to other users, so there's no need for consistency.
 
-1. API - This responds to web requests from both the client and other servers
-2. Real-time notifications (RTN) - This uses sockets to do real-time bidirectional communication with the client for things like notifications and chat
+Communication with other servers is defined by the Sendship API.
 
 ### Sendship client
 
 The Sendship client (or simply 'client') is an application that provides a user interface for interating with the server.
+It communicates only with the user's own Sendship server.
+It does not interact directly with other Sendship servers.
 It has the following components:
 
 1. Feed
 2. Profile
 3. Messages
 
-## API
+Implementers are free to design the client as they wish.
 
-This section outlines the API used by the protocol.
+## Sendship API v1
+
+This section outlines version 1 of the API used for communication between servers.
+All endpoints are prefixed with the path `/sendship/api/[version]/`.
+Any API for communications between client and server should be on a separate path, e.g. `/client/api/`.
 
 ### Error responses
 
@@ -168,115 +175,6 @@ Errors should use error codes appropriate for the cause of the error, and have a
       "error": "string",
       "message": "string"
     }
-```
-
-### Create Post
-
-This endpoint allows users to create a new post.
-
-#### Authorization
-
-Self only.
-
-#### Request
-
-**Endpoint:** `POST /api/v1/posts`
-
-**Headers:**
-
-- `Content-Type: application/json`
-- `Authorization: Bearer {access_token}`
-
-**Body:**
-
-```json
-{
-  "content": "string",
-  "images": [
-    {
-      "url": "string",
-      "sha256": "string"
-    }
-  ] (optional),
-  "videos": [
-    {
-      "url": "string",
-      "sha256": "string"
-    }
-  ] (optional),
-  "parent_post": {
-    "domain": "string",
-    "id": "string",
-    "sha256": "string"
-  } (optional),
-  "shared_post": {
-    "domain": "string",
-    "id": "string",
-    "sha256": "string"
-  } (optional),
-  "audience": "string"
-}
-```
-
-#### Parameters
-
-| Parameter   | Description                                                  | Type        | Required |
-| ----------- | ------------------------------------------------------------ | ----------- | -------- |
-| content     | The content of the post.                                     | string      | Yes      |
-| images      | A list of image objects associated with the post.            | [Image]     | No       |
-| videos      | A list of video objects associated with the post.            | [Video]     | No       |
-| parent_post | An object containing information about the parent post.      | ParentPost  | No       |
-| shared_post | An object containing information about the post being shared.| SharedPost  | No       |
-| audience    | The visibility level of the post.                             | string      | Yes      |
-
-##### Image Object
-
-| Attribute | Description                             | Type   | Required |
-| --------- | --------------------------------------- | ------ | -------- |
-| url       | The URL of the image.                  | string | Yes      |
-| sha256    | The SHA-256 hash of the image content. | string | Yes      |
-
-##### Video Object
-
-| Attribute | Description                             | Type   | Required |
-| --------- | --------------------------------------- | ------ | -------- |
-| url       | The URL of the video.                  | string | Yes      |
-| sha256    | The SHA-256 hash of the video content. | string | Yes      |
-
-##### Parent Post Object
-
-| Attribute | Description                             | Type   | Required |
-| --------- | --------------------------------------- | ------ | -------- |
-| domain    | The domain name of the parent post.     | string | Yes      |
-| id        | The ID of the parent post.              | string | Yes      |
-| sha256    | The SHA-256 hash of the parent post.    | string | Yes      |
-
-##### Shared Post Object
-
-| Attribute | Description                             | Type   | Required |
-| --------- | --------------------------------------- | ------ | -------- |
-| domain    | The domain name of the shared post.     | string | Yes      |
-| id        | The ID of the shared post.              | string | Yes      |
-| sha256    | The SHA-256 hash of the shared post.    | string | Yes      |
-
-##### Audience Values
-
-| Value     | Description                                           |
-| --------- | ----------------------------------------------------- |
-| public    | Anyone can access the post.                            |
-| sendship  | Any Sendship server can access the post.              |
-| followees | Only the post creator and the people they follow can access. |
-
-#### Response
-
-**Status code:** `201 Created`
-
-**Body:**
-
-```json
-{
-  "id": "string"
-}
 ```
 
 ### Get Post
