@@ -440,6 +440,60 @@ Each reply in the replies list is a JWT string from the replier signed with RS25
 | reply_post_id  | The ID of the reply post.                        | string |
 | parent_post_id | The ID of the post being replied to (should match this post's ID).             | string |
 
+### Get Posts
+
+This endpoint returns this server's user's posts in the specified interval.
+
+#### Authorization
+
+Posts are filtered by their visibility to the caller.
+
+#### Request
+
+**Endpoint:** `GET /api/v1/posts`
+
+**Headers:**
+
+- `Content-Type: application/json`
+- `Authorization: Bearer {access_token}` (optional)
+
+#### Query Parameters
+
+| Parameter | Description                     | Type   | Required |
+| --------- | ------------------------------- | ------ | -------- |
+| before   | Filter posts to before this timestamp. (ISO 8601 format) | string | No      |
+| after   | Filter posts to after this timestamp. (ISO 8601 format) | string | No      |
+
+#### Response
+
+**Status code:** `200 OK`
+
+**Body:**
+
+```json
+{
+  "posts": [
+    {
+      "id": "string",
+      "created_at": "string"
+    }
+  ],
+}
+```
+
+#### Response Fields
+
+| Field      | Description                                                  | Type        | Required |
+| ---------- | ------------------------------------------------------------ | ----------- | -------- |
+| posts         | A list of references to posts.                           | [PostReference]      | Yes      |
+
+##### PostReference Object
+
+| Attribute | Description                             | Type   | Required |
+| --------- | --------------------------------------- | ------ | -------- |
+| id       | The ID of the post.                  | string | Yes      |
+| sha256    | The timestamp when the post was created (ISO 8601 format). | string | Yes      |
+
 ### TODO add more endpoints
 
 ## Security Considerations
